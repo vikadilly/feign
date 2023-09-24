@@ -5,7 +5,6 @@ import com.squareup.moshi.*;
 import feign.Response;
 import feign.Util;
 import feign.codec.Decoder;
-import okio.BufferedSource;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Type;
@@ -13,7 +12,16 @@ import static feign.Util.UTF_8;
 import static feign.Util.ensureClosed;
 
 public class MoshiDecoder implements Decoder {
-  Moshi moshi = new Moshi.Builder().build();
+  private final Moshi moshi;
+
+  public MoshiDecoder(Moshi moshi) {
+    this.moshi = moshi;
+  }
+
+  public MoshiDecoder() {
+    this.moshi = new Moshi.Builder().build();
+  }
+
 
   @Override
   public Object decode(Response response, Type type) throws IOException {
