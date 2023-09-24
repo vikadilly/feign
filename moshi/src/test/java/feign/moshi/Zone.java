@@ -13,24 +13,25 @@
  */
 package feign.moshi;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
+import java.util.LinkedHashMap;
 
-public class MoshiFactory {
-  private MoshiFactory() {}
+public class Zone extends LinkedHashMap<String, Object> {
 
-  /**
-   * Registers JsonAdapter by implicit type. Adds one to read numbers in a {@code Map<String,
-   * Object>} as Integers.
-   */
-  static Moshi create(Iterable<JsonAdapter<?>> adapters) {
-    Moshi.Builder builder = new Moshi.Builder();
-
-    for (JsonAdapter<?> adapter : adapters) {
-      builder.add(adapter);
-    }
-
-    return builder.build();
+  Zone() {
+    // for reflective instantiation.
   }
+
+  Zone(String name) {
+    this(name, null);
+  }
+
+  Zone(String name, String id) {
+    put("name", name);
+    if (id != null) {
+      put("id", id);
+    }
+  }
+
+  private static final long serialVersionUID = 1L;
 }
 

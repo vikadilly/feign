@@ -1,13 +1,22 @@
-import com.squareup.moshi.Moshi;
+/*
+ * Copyright 2012-2023 The Feign Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package feign.moshi;
+
 import feign.Request;
-import feign.RequestTemplate;
 import feign.Response;
 import feign.Util;
-import feign.moshi.MoshiDecoder;
-import feign.moshi.MoshiEncoder;
 import org.junit.Test;
-
-import java.io.IOException;
 import java.util.*;
 import static feign.Util.UTF_8;
 import static feign.assertj.FeignAssertions.assertThat;
@@ -48,7 +57,7 @@ public class MoshiDecoderTest {
         .build();
 
     assertEquals(zones,
-        new MoshiDecoder().decode(response, zones.getClass()));
+        new MoshiDecoder().decode(response, List.class));
   }
 
   private String zonesJson = ""//
@@ -65,23 +74,25 @@ public class MoshiDecoderTest {
   @Test
   public void nullBodyDecodesToNull() throws Exception {
     Response response = Response.builder()
-            .status(204)
-            .reason("OK")
-            .headers(Collections.emptyMap())
-            .request(Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-            .build();
+        .status(204)
+        .reason("OK")
+        .headers(Collections.emptyMap())
+        .request(Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null,
+            Util.UTF_8))
+        .build();
     assertNull(new MoshiDecoder().decode(response, String.class));
   }
 
   @Test
   public void emptyBodyDecodesToNull() throws Exception {
     Response response = Response.builder()
-            .status(204)
-            .reason("OK")
-            .headers(Collections.emptyMap())
-            .request(Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-            .body(new byte[0])
-            .build();
+        .status(204)
+        .reason("OK")
+        .headers(Collections.emptyMap())
+        .request(Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null,
+            Util.UTF_8))
+        .body(new byte[0])
+        .build();
     assertNull(new MoshiDecoder().decode(response, String.class));
   }
 
@@ -90,35 +101,37 @@ public class MoshiDecoderTest {
   @Test
   public void notFoundDecodesToEmpty() throws Exception {
     Response response = Response.builder()
-            .status(404)
-            .reason("NOT FOUND")
-            .headers(Collections.emptyMap())
-            .request(Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-            .build();
+        .status(404)
+        .reason("NOT FOUND")
+        .headers(Collections.emptyMap())
+        .request(Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null,
+            Util.UTF_8))
+        .build();
     assertThat((byte[]) new MoshiDecoder().decode(response, byte[].class)).isEmpty();
   }
 
   @Test
   public void customDecoder() throws Exception {
-    final UpperZoneJSONAdapter upperZone = new UpperZoneJSONAdapter();
+    final UpperZoneJSONAdapter upperZoneAdapter = new UpperZoneJSONAdapter();
 
-    Moshi testAdapter = new Moshi.Builder().add(upperZone).build();
-    MoshiDecoder decoder = new MoshiDecoder(testAdapter);
+    MoshiDecoder decoder = new MoshiDecoder(Collections.singleton(upperZoneAdapter));
 
     List<Zone> zones = new LinkedList<>();
     zones.add(new Zone("DENOMINATOR.IO."));
     zones.add(new Zone("DENOMINATOR.IO.", "ABCD"));
 
     Response response =
-            Response.builder()
-                    .status(200)
-                    .reason("OK")
-                    .headers(Collections.emptyMap())
-                    .request(
-                            Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null, Util.UTF_8))
-                    .body(zonesJson, UTF_8)
-                    .build();
-    assertEquals(zones, decoder.decode(response, Zone.class));
+        Response.builder()
+            .status(200)
+            .reason("OK")
+            .headers(Collections.emptyMap())
+            .request(
+                Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null,
+                    Util.UTF_8))
+            .body(zonesJson, UTF_8)
+            .build();
+
+    assertEquals(zones, decoder.decode(response, Object.class));
   }
 
 }
