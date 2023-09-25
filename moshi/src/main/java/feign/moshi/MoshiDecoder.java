@@ -15,6 +15,7 @@ package feign.moshi;
 
 import com.google.common.io.CharStreams;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.JsonEncodingException;
 import com.squareup.moshi.Moshi;
 import feign.Response;
@@ -55,7 +56,7 @@ public class MoshiDecoder implements Decoder {
 
     try {
       return parseJson(jsonAdapter, reader);
-    } catch (JsonEncodingException e) {
+    } catch (JsonDataException e) {
       if (e.getCause() != null && e.getCause() instanceof IOException) {
         throw (IOException) e.getCause();
       }

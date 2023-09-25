@@ -13,11 +13,12 @@
  */
 package feign.moshi;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import feign.RequestTemplate;
 import org.junit.Test;
 import java.util.*;
 import static feign.assertj.FeignAssertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class MoshiEncoderTest {
   @Test
@@ -64,7 +65,7 @@ public class MoshiEncoderTest {
     zones.add(new Zone("denominator.io.", "abcd"));
 
     RequestTemplate template = new RequestTemplate();
-    encoder.encode(zones, Object.class, template);
+    encoder.encode(zones, UpperZoneJSONAdapter.class, template);
 
     assertThat(template).hasBody("" //
         + "[\n" //
@@ -78,5 +79,26 @@ public class MoshiEncoderTest {
         + "]");
   }
 
+  @Test
+  public void customObjectEncoder() throws Exception {
+    final JsonAdapter<VideoGame> videoGameJsonAdapter =
+        new Moshi.Builder().build().adapter(VideoGame.class);
+    MoshiEncoder encoder = new MoshiEncoder(Collections.singleton(videoGameJsonAdapter));
+
+    VideoGame videoGame = new VideoGame("Super Mario", "Luigi", "Bowser");
+
+    RequestTemplate template = new RequestTemplate();
+    encoder.encode(videoGame, videoGameJsonAdapter.getClass(), template);
+
+
+    assertThat(template)
+        .hasBody("{\n" +
+            "  \"hero\": {\n" +
+            "    \"enemy\": \"Bowser\",\n" +
+            "    \"name\": \"Luigi\"\n" +
+            "  },\n" +
+            "  \"name\": \"Super Mario\"\n" +
+            "}");
+  }
 }
 

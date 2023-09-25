@@ -13,11 +13,16 @@
  */
 package feign.moshi;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import feign.Request;
 import feign.Response;
 import feign.Util;
 import org.junit.Test;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import static feign.Util.UTF_8;
 import static feign.assertj.FeignAssertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -70,6 +75,14 @@ public class MoshiDecoderTest {
       + "    \"id\": \"ABCD\"\n"//
       + "  }\n"//
       + "]\n";
+
+  private final String videoGamesJson = "{\n   " +
+      " \"hero\": {\n     " +
+      " \"enemy\": \"Bowser\",\n     " +
+      " \"name\": \"Luigi\"\n    " +
+      "},\n    " +
+      "\"name\": \"Super Mario\"\n  " +
+      "}";
 
   @Test
   public void nullBodyDecodesToNull() throws Exception {
@@ -131,7 +144,32 @@ public class MoshiDecoderTest {
             .body(zonesJson, UTF_8)
             .build();
 
-    assertEquals(zones, decoder.decode(response, Object.class));
+    assertEquals(zones, decoder.decode(response, UpperZoneJSONAdapter.class));
   }
 
+  @Test
+  public void customObjectDecoder() throws Exception {
+    final JsonAdapter<VideoGame> videoGameJsonAdapter =
+        new Moshi.Builder().build().adapter(VideoGame.class);
+
+    MoshiDecoder decoder = new MoshiDecoder(Collections.singleton(videoGameJsonAdapter));
+
+    VideoGame videoGame = new VideoGame("Super Mario", "Luigi", "Bowser");
+
+    Response response =
+        Response.builder()
+            .status(200)
+            .reason("OK")
+            .headers(Collections.emptyMap())
+            .request(
+                Request.create(Request.HttpMethod.GET, "/api", Collections.emptyMap(), null,
+                    Util.UTF_8))
+            .body(videoGamesJson, UTF_8)
+            .build();
+
+    VideoGame actual = (VideoGame) decoder.decode(response, videoGameJsonAdapter.getClass());
+
+    assertThat(actual)
+        .isEqualToComparingFieldByFieldRecursively(videoGame);
+  }
 }

@@ -13,24 +13,33 @@
  */
 package feign.moshi;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Json;
 
-public class MoshiFactory {
-  private MoshiFactory() {}
+public class VideoGame {
 
-  /**
-   * Registers JsonAdapter by implicit type. Adds one to read numbers in a {@code Map<String,
-   * Object>} as Integers.
-   */
-  static Moshi create(Iterable<JsonAdapter<?>> adapters) {
-    Moshi.Builder builder = new Moshi.Builder();
+  @Json(name = "name")
+  public final String name;
 
-    for (JsonAdapter<?> adapter : adapters) {
-      builder.add(adapter.getClass(), adapter);
-    }
+  @Json(name = "hero")
+  public final Hero hero;
 
-    return builder.build();
+  public VideoGame(String name, String hero, String enemy) {
+    this.name = name;
+    this.hero = new Hero(hero, enemy);
   }
-}
 
+  static class Hero {
+    @Json(name = "name")
+    public final String name;
+
+    @Json(name = "enemy")
+    public final String enemyName;
+
+    Hero(String name, String enemyName) {
+      this.name = name;
+      this.enemyName = enemyName;
+    }
+  }
+
+
+}
