@@ -59,3 +59,4 @@ public class ExpressionsTest {
     assertThat(pattern.contains("}")).isEqualTo(pattern.contains("\\}"));
   }
 }
+

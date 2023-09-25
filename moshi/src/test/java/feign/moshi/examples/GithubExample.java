@@ -17,12 +17,13 @@ import feign.Feign;
 import feign.Param;
 import feign.RequestLine;
 import feign.moshi.MoshiDecoder;
+import feign.moshi.MoshiEncoder;
 import java.util.List;
 
 public class GithubExample {
 
   public static void main(String... args) {
-    GitHub github = Feign.builder()
+    GitHub github = Feign.builder().encoder(new MoshiEncoder())
         .decoder(new MoshiDecoder())
         .target(GitHub.class, "https://api.github.com");
 

@@ -62,7 +62,6 @@ public class MoshiDecoder implements Decoder {
       }
       throw e;
     } finally {
-      // close the reader
       ensureClosed(reader);
     }
   }

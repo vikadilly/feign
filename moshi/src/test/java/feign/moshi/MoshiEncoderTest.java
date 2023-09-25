@@ -21,6 +21,7 @@ import java.util.*;
 import static feign.assertj.FeignAssertions.assertThat;
 
 public class MoshiEncoderTest {
+
   @Test
   public void encodesMapObjectNumericalValuesAsInteger() {
     Map<String, Object> map = new LinkedHashMap<>();
@@ -80,7 +81,7 @@ public class MoshiEncoderTest {
   }
 
   @Test
-  public void customObjectEncoder() throws Exception {
+  public void customObjectEncoder() {
     final JsonAdapter<VideoGame> videoGameJsonAdapter =
         new Moshi.Builder().build().adapter(VideoGame.class);
     MoshiEncoder encoder = new MoshiEncoder(Collections.singleton(videoGameJsonAdapter));
